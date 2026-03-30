@@ -1,0 +1,66 @@
+{% extends "layout/base_main.html" %}
+
+{% block content %}
+
+<div class="card border-0 shadow-sm p-4">
+
+    <h3 class="mb-4">Your Teaching Assignments</h3>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-striped bg-white shadow-sm">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Class</th>
+                    <th>Subject</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% if assignments %}
+                    {% for a in assignments %}
+                    <tr>
+
+                        <!-- CLASS -->
+                        <td>
+                            <span class="badge bg-success">
+                                {{ a.class_.class_name }}
+                            </span>
+                        </td>
+
+                        <!-- SUBJECT -->
+                        <td>
+                            <span class="badge bg-info text-dark">
+                                {{ a.subject.subject_name }}
+                            </span>
+                        </td>
+
+                        <!-- ACTION -->
+                        <td>
+                            <a href="{{ url_for('teacher.students', assignment_id=a.id) }}"
+                               class="btn btn-sm btn-primary">
+                                <i class="bi bi-gear me-1"></i>
+                                Manage Students & Marks
+                            </a>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">
+                            No assignments found
+                        </td>
+                    </tr>
+                {% endif %}
+
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

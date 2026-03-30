@@ -1,0 +1,94 @@
+{% extends "layout/base_main.html" %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4 fw-bold">
+    <i class="bi bi-speedometer2 me-2"></i> Admin Dashboard
+</h2>
+
+<div class="row g-4">
+
+    <!-- Students -->
+    <div class="col-md-3">
+        <a href="{{ url_for('admin.manage_students') }}" class="text-decoration-none">
+            <div class="card p-4 shadow-sm border-0 text-center hover-card">
+                <i class="bi bi-people-fill fs-1 text-success"></i>
+                <p class="text-muted mt-2 mb-1">Total Students</p>
+                <h2 class="text-success fw-bold">{{ stats.total_students }}</h2>
+            </div>
+        </a>
+    </div>
+
+    <!-- Teachers -->
+    <div class="col-md-3">
+        <a href="{{ url_for('admin.manage_teachers') }}" class="text-decoration-none">
+            <div class="card p-4 shadow-sm border-0 text-center hover-card">
+                <i class="bi bi-person-badge-fill fs-1 text-primary"></i>
+                <p class="text-muted mt-2 mb-1">Total Teachers</p>
+                <h2 class="text-primary fw-bold">{{ stats.total_teachers }}</h2>
+            </div>
+        </a>
+    </div>
+
+    <!-- Classes -->
+    <div class="col-md-3">
+        <a href="{{ url_for('admin.manage_classes') }}" class="text-decoration-none">
+            <div class="card p-4 shadow-sm border-0 text-center hover-card">
+                <i class="bi bi-building fs-1 text-warning"></i>
+                <p class="text-muted mt-2 mb-1">Total Classes</p>
+                <h2 class="text-warning fw-bold">{{ stats.total_classes }}</h2>
+            </div>
+        </a>
+    </div>
+
+    <!-- Subjects -->
+    <div class="col-md-3">
+        <a href="{{ url_for('admin.manage_subjects') }}" class="text-decoration-none">
+            <div class="card p-4 shadow-sm border-0 text-center hover-card">
+                <i class="bi bi-book-fill fs-1 text-danger"></i>
+                <p class="text-muted mt-2 mb-1">Total Subjects</p>
+                <h2 class="text-danger fw-bold">{{ stats.total_subjects }}</h2>
+            </div>
+        </a>
+    </div>
+
+</div>
+
+<!-- 🔥 ACTION CARDS (NEW PROFESSIONAL TOUCH) -->
+<div class="row g-4 mt-4">
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 p-4 text-center">
+            <i class="bi bi-person-plus fs-1 text-success"></i>
+            <h5 class="mt-3">Manage Students</h5>
+            <a href="{{ url_for('admin.manage_students') }}" class="btn btn-success mt-2">
+                Open
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 p-4 text-center">
+            <i class="bi bi-person-workspace fs-1 text-primary"></i>
+            <h5 class="mt-3">Manage Teachers</h5>
+            <a href="{{ url_for('admin.manage_teachers') }}" class="btn btn-primary mt-2">
+                Open
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 p-4 text-center">
+            <i class="bi bi-diagram-3 fs-1 text-warning"></i>
+            <h5 class="mt-3">Assign Teachers</h5>
+            <a href="{{ url_for('admin.assign_teachers') }}" class="btn btn-warning mt-2">
+                Assign
+            </a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

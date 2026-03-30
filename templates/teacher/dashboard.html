@@ -1,0 +1,71 @@
+{% extends "layout/base_main.html" %}
+
+{% block content %}
+
+<h2 class="mb-4 fw-bold">Dashboard</h2>
+
+<div class="row g-4">
+
+    <!-- STUDENTS -->
+    <div class="col-md-4">
+        <a href="{{ url_for('teacher.my_students') }}" class="text-decoration-none">
+            <div class="card p-4 shadow-sm border-0 text-center bg-primary text-white dashboard-card">
+
+                <i class="bi bi-people-fill fs-1 mb-3"></i>
+
+                <h4>Students</h4>
+                <h2 class="fw-bold">{{ stats.total_students }}</h2>
+
+            </div>
+        </a>
+    </div>
+
+    <!-- CLASSES -->
+    <div class="col-md-4">
+        <a href="{{ url_for('teacher.my_classes') }}" class="text-decoration-none">
+            <div class="card p-4 shadow-sm border-0 text-center bg-warning text-white dashboard-card">
+
+                <i class="bi bi-building fs-1 mb-3"></i>
+
+                <h4>Classes</h4>
+                <h2 class="fw-bold">{{ stats.assigned_classes }}</h2>
+
+            </div>
+        </a>
+    </div>
+
+    <!-- SUBJECTS -->
+    <div class="col-md-4">
+        <a href="{{ url_for('teacher.my_classes') }}" class="text-decoration-none">
+            <div class="card p-4 shadow-sm border-0 text-center bg-danger text-white dashboard-card">
+
+                <i class="bi bi-book-fill fs-1 mb-3"></i>
+
+                <h4>Subjects</h4>
+                <h2 class="fw-bold">{{ stats.assigned_subjects }}</h2>
+
+            </div>
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<style>
+
+/* Hover Effect 🔥 */
+.dashboard-card {
+    transition: 0.3s ease;
+    border-radius: 12px;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 8px 20px rgba(0,0,0,0.2);
+    cursor: pointer;
+}
+
+</style>
+{% endblock %}

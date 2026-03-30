@@ -1,0 +1,163 @@
+{% extends "common/base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row align-items-center" style="min-height: 85vh;">
+
+        <!-- ================= LEFT SIDE (GREETING) ================= -->
+        <div class="col-md-6 mb-4">
+
+            <div class="p-4">
+
+                <h1 class="fw-bold mb-3">
+                    Welcome Back 👋
+                </h1>
+
+                <p class="text-muted mb-4">
+                    Manage your school effortlessly with our smart dashboard.
+                </p>
+
+                <!-- FEATURE CARDS -->
+                <div class="row g-3">
+
+                    <div class="col-6">
+                        <div class="p-3 shadow-sm rounded-3 bg-white text-center">
+                            <i class="bi bi-people-fill text-success fs-3"></i>
+                            <p class="mt-2 mb-0 small fw-semibold">Students</p>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="p-3 shadow-sm rounded-3 bg-white text-center">
+                            <i class="bi bi-person-badge-fill text-primary fs-3"></i>
+                            <p class="mt-2 mb-0 small fw-semibold">Teachers</p>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="p-3 shadow-sm rounded-3 bg-white text-center">
+                            <i class="bi bi-book-fill text-warning fs-3"></i>
+                            <p class="mt-2 mb-0 small fw-semibold">Subjects</p>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="p-3 shadow-sm rounded-3 bg-white text-center">
+                            <i class="bi bi-diagram-3-fill text-danger fs-3"></i>
+                            <p class="mt-2 mb-0 small fw-semibold">Assignments</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= RIGHT SIDE (LOGIN CARD) ================= -->
+        <div class="col-md-6">
+
+            <div class="card shadow-lg border-0 rounded-4">
+
+                <!-- Header -->
+                <div class="text-center p-4 border-bottom">
+                    <i class="bi bi-person-circle fs-1 text-success"></i>
+                    <h3 class="mt-2">Login</h3>
+                    <p class="text-muted small">Access your dashboard</p>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body p-4">
+
+                    <form id="loginForm" class="d-flex flex-column gap-3">
+
+                        <!-- Email -->
+                        <div>
+                            <label class="form-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                <input type="email" id="email" class="form-control" placeholder="Enter your email"
+                                    required>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <label class="form-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input type="password" id="password" class="form-control"
+                                    placeholder="Enter your password" required>
+                            </div>
+                        </div>
+
+                        <!-- Button -->
+                        <button type="submit" class="btn btn-success w-100 fw-bold">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                        </button>
+
+                        <div class="text-end mb-2">
+                            <a href="{{ url_for('auth.forgot_password') }}">Forgot Password?</a>
+                        </div>
+
+                        <!-- Message -->
+                        <div id="loginMessage" class="text-center small"></div>
+
+                    </form>
+
+                    <p class="text-muted mt-3 small text-center">
+                        Teachers & Students: Use credentials provided by Admin
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim().toLowerCase();
+    const password = document.getElementById("password").value.trim();
+
+    const res = await fetch("/auth/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    const msgDiv = document.getElementById("loginMessage");
+
+    if (data.status === "success" || data.status === "first_login") {
+        window.location.href = data.redirect;
+    } else {
+        msgDiv.innerText = data.message;
+        msgDiv.classList.add("text-danger");
+    }
+
+});
+
+</script>
+
+{% endblock %}

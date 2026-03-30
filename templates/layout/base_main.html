@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+
+    <link href="{{ url_for('static', filename='assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='assets/css/main.css') }}" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+
+        /* 🔥 SIDEBAR GREEN THEME */
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #198754, #146c43);
+            color: white;
+        }
+
+        /* LINKS */
+        .sidebar a {
+            color: #e9f7ef;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        /* HOVER */
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            padding-left: 20px;
+        }
+
+        /* ACTIVE LINK */
+        .sidebar .active {
+            background: #20c997;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* USER NAME */
+        .sidebar strong {
+            color: #ffffff;
+        }
+
+        /* CONTENT AREA */
+        .dashboard-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="d-flex">
+
+        <!-- 🔥 SIDEBAR -->
+        <div class="sidebar p-3">
+
+            <h4 class="text-center mb-4 fw-bold text-white">MITRAz</h4>
+
+            <!-- USER INFO -->
+            <div class="text-center mb-4">
+                <strong>{{ session.name }}</strong><br>
+            </div>
+
+            <hr>
+
+            <!-- NAVIGATION -->
+            <ul class="nav flex-column">
+
+                {% if session.role == 'admin' %}
+
+                <li><a href="{{ url_for('admin.dashboard') }}">🏠 Dashboard</a></li>
+                <li><a href="{{ url_for('admin.manage_students') }}">🎓 Students</a></li>
+                <li><a href="{{ url_for('admin.manage_teachers') }}">👨‍🏫 Teachers</a></li>
+                <li><a href="{{ url_for('admin.manage_classes') }}">🏫 Classes</a></li>
+                <li><a href="{{ url_for('admin.manage_subjects') }}">📘 Subjects</a></li>
+                <li><a href="{{ url_for('admin.assign_teachers') }}">🧑‍🏫 Assign</a></li>
+                <li><a href="{{ url_for('admin.messages') }}">📩 Messages</a></li>
+                <li><a href="{{ url_for('admin.feedbacks') }}">💬 Feedbacks</a></li>
+
+                {% elif session.role == 'teacher' %}
+
+                <li><a href="{{ url_for('teacher.dashboard') }}">🏠 Dashboard</a></li>
+                <li><a href="{{ url_for('teacher.my_students') }}">👨‍🎓 My Students</a></li>
+                <li><a href="{{ url_for('teacher.my_classes') }}">📚 My Classes & Subjects</a></li>
+                <li><a href="{{ url_for('teacher.profile') }}">👤 My Profile</a></li>
+
+                {% elif session.role == 'student' %}
+
+                <li><a href="{{ url_for('student.dashboard') }}">🏠 Dashboard</a></li>
+
+                {% endif %}
+
+            </ul>
+
+            <hr>
+
+            <!-- LOGOUT -->
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-danger w-100 mt-3">
+                🚪 Logout
+            </a>
+
+        </div>
+
+        <!-- 🔥 MAIN CONTENT -->
+        <div class="dashboard-content">
+            {% block content %}{% endblock %}
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+
+</html>

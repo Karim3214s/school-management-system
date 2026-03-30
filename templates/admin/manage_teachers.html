@@ -1,0 +1,372 @@
+{% extends "layout/base_main.html" %}
+
+{% block page_title %}Manage Teachers{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Manage Teachers</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTeacherModal">
+        + Add Teacher
+    </button>
+</div>
+
+<form id="teacherSearchForm" class="mb-3 d-flex">
+
+    <input type="text"
+           id="teacherSearch"
+           class="form-control me-2"
+           placeholder="Search teachers...">
+
+    <button type="submit" class="btn btn-success">
+        Search
+    </button>
+
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover shadow-sm bg-white">
+        <thead class="table-light">
+            <tr>
+                <th>Photo</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Qualification</th>
+                <th>Experience</th>
+                <th style="width: 120px;">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id='teacherTableBody'>
+            {% for teacher in teachers.items %}
+            <tr>
+                <td>
+                    <img src="{{ url_for('static', filename='uploads/' + (teacher.photo or 'default.png')) }}"
+                        width="50" height="50" style="object-fit: cover; border-radius: 50%;">
+                </td>
+                <td>{{ teacher.user_account.name }}</td>
+                <td>{{ teacher.user_account.email }}</td>
+                <td>{{ teacher.qualification }}</td>
+                <td>{{ teacher.experience }}</td>
+
+                <td>
+                    <button class="btn btn-sm btn-warning edit-teacher" data-id="{{ teacher.id }}">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-info view-teacher" data-id="{{ teacher.id }}">
+                        <i class="bi bi-eye"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-danger delete-teacher" data-id="{{ teacher.id }}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+        <!-- PREVIOUS -->
+        <li class="page-item {% if not teachers.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.manage_teachers', page=teachers.prev_num, search=search) }}">
+                Previous
+            </a>
+        </li>
+
+        <!-- PAGE NUMBERS -->
+        {% for p in range(1, teachers.pages + 1) %}
+        <li class="page-item {% if p == teachers.page %}active disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.manage_teachers', page=p, search=search) }}">
+                {{ p }}
+            </a>
+        </li>
+        {% endfor %}
+
+        <!-- NEXT -->
+        <li class="page-item {% if not teachers.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.manage_teachers', page=teachers.next_num, search=search) }}">
+                Next
+            </a>
+        </li>
+
+    </ul>
+</nav>
+
+<!-- ================= ADD MODAL ================= -->
+<div class="modal fade" id="addTeacherModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content p-3">
+            <h5>Add Teacher</h5>
+
+            <form id="addTeacherForm">
+                <input type="text" id="teacherName" class="form-control mb-2" placeholder="Name" required>
+                <input type="email" id="teacherEmail" class="form-control mb-2" placeholder="Email" required>
+                <input type="text" id="teacherPhone" class="form-control mb-2" placeholder="Phone">
+                <input type="text" id="teacherQual" class="form-control mb-2" placeholder="Qualification">
+                <input type="number" id="teacherExp" class="form-control mb-2" placeholder="Experience">
+                <textarea id="teacherAddress" class="form-control mb-2" placeholder="Address"></textarea>
+                <input type="file" id="teacherPhoto" class="form-control mb-3">
+
+                <button type="submit" class="btn btn-success w-100">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= VIEW MODAL ================= -->
+<div class="modal fade" id="viewTeacherModal">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+
+            <h5>Teacher Details</h5>
+
+            <img id="tPhoto" width="100" height="100" style="border-radius:50%">
+
+            <p><b>Name:</b> <span id="tName"></span></p>
+            <p><b>Email:</b> <span id="tEmail"></span></p>
+            <p><b>Phone:</b> <span id="tPhone"></span></p>
+            <p><b>Qualification:</b> <span id="tQual"></span></p>
+            <p><b>Experience:</b> <span id="tExp"></span></p>
+            <p><b>Address:</b> <span id="tAddr"></span></p>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================= EDIT MODAL ================= -->
+<div class="modal fade" id="editTeacherModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content p-3">
+
+            <h5>Edit Teacher</h5>
+
+            <form id="editTeacherForm">
+
+                <input type="hidden" id="editTeacherId">
+
+                <input type="text" id="editName" class="form-control mb-2">
+                <input type="email" id="editEmail" class="form-control mb-2">
+                <input type="text" id="editPhone" class="form-control mb-2">
+                <input type="text" id="editQual" class="form-control mb-2">
+                <input type="number" id="editExp" class="form-control mb-2">
+                <textarea id="editAddress" class="form-control mb-2"></textarea>
+
+                <input type="file" id="editPhoto" class="form-control mb-2">
+
+                <button type="submit" class="btn btn-success w-100">Update</button>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // ================= ADD TEACHER =================
+    document.getElementById("addTeacherForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData();
+
+        formData.append("name", document.getElementById("teacherName").value);
+        formData.append("email", document.getElementById("teacherEmail").value);
+        formData.append("phone", document.getElementById("teacherPhone").value);
+        formData.append("qualification", document.getElementById("teacherQual").value);
+        formData.append("experience", document.getElementById("teacherExp").value);
+        formData.append("address", document.getElementById("teacherAddress").value);
+
+        const photo = document.getElementById("teacherPhoto").files[0];
+        if (photo) {
+            formData.append("photo", photo);
+        }
+
+        const res = await fetch("/admin/add-teacher", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+            location.reload();
+        } else {
+            alert(data.message || "Error adding teacher");
+        }
+    });
+
+
+    // ================= CLICK HANDLER =================
+    document.addEventListener("click", async function (e) {
+
+        const btn = e.target.closest("button");
+        if (!btn) return;
+
+        const id = btn.dataset.id;
+
+        // ===== VIEW =====
+        if (btn.classList.contains("view-teacher")) {
+
+            const res = await fetch(`/admin/get-teacher/${id}`);
+            const data = await res.json();
+
+            document.getElementById("tName").innerText = data.name || "-";
+            document.getElementById("tEmail").innerText = data.email || "-";
+            document.getElementById("tPhone").innerText = data.phone || "-";
+            document.getElementById("tQual").innerText = data.qualification || "-";
+            document.getElementById("tExp").innerText = data.experience || "-";
+            document.getElementById("tAddr").innerText = data.address || "-";
+
+            document.getElementById("tPhoto").src =
+                "/static/uploads/" + (data.photo || "default.png");
+
+            new bootstrap.Modal(document.getElementById('viewTeacherModal')).show();
+        }
+
+        // ===== EDIT =====
+        if (btn.classList.contains("edit-teacher")) {
+
+            const res = await fetch(`/admin/get-teacher/${id}`);
+            const data = await res.json();
+
+            document.getElementById("editTeacherId").value = id;
+            document.getElementById("editName").value = data.name || "";
+            document.getElementById("editEmail").value = data.email || "";
+            document.getElementById("editPhone").value = data.phone || "";
+            document.getElementById("editQual").value = data.qualification || "";
+            document.getElementById("editExp").value = data.experience || "";
+            document.getElementById("editAddress").value = data.address || "";
+
+            new bootstrap.Modal(document.getElementById('editTeacherModal')).show();
+        }
+
+        // ===== DELETE =====
+        if (btn.classList.contains("delete-teacher")) {
+
+            if (!confirm("Delete this teacher?")) return;
+
+            const res = await fetch(`/admin/delete-teacher/${id}`, {
+                method: "DELETE"
+            });
+
+            const data = await res.json();
+
+            if (data.status === "success") {
+                btn.closest("tr").remove();
+            }
+        }
+
+    });
+
+
+    // ================= UPDATE TEACHER =================
+    document.getElementById("editTeacherForm").addEventListener("submit", async function (e) {
+
+        e.preventDefault();
+
+        const id = document.getElementById("editTeacherId").value;
+
+        const formData = new FormData();
+
+        formData.append("name", document.getElementById("editName").value);
+        formData.append("email", document.getElementById("editEmail").value);
+        formData.append("phone", document.getElementById("editPhone").value);
+        formData.append("qualification", document.getElementById("editQual").value);
+        formData.append("experience", document.getElementById("editExp").value);
+        formData.append("address", document.getElementById("editAddress").value);
+
+        const photo = document.getElementById("editPhoto").files[0];
+        if (photo) {
+            formData.append("photo", photo);
+        }
+
+        const res = await fetch(`/admin/update-teacher/${id}`, {
+            method: "PUT",
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+            location.reload();
+        } else {
+            alert(data.message || "Update failed");
+        }
+    });
+
+
+    // ================= AJAX SEARCH =================
+    const teacherForm = document.getElementById("teacherSearchForm");
+
+teacherForm.addEventListener("submit", async function(e) {
+
+    e.preventDefault(); // 🚨 stop reload
+
+    const value = document.getElementById("teacherSearch").value.trim();
+
+    const res = await fetch(`/admin/search-teachers?search=${value}`);
+    const data = await res.json();
+
+    const tbody = document.getElementById("teacherTableBody");
+    tbody.innerHTML = "";
+
+    if (data.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center text-muted">
+                    No teachers found
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    data.forEach(t => {
+        tbody.innerHTML += `
+            <tr>
+                <td>
+                    <img src="/static/uploads/${t.photo || 'default.png'}"
+                         width="50" height="50"
+                         style="object-fit: cover; border-radius: 50%;">
+                </td>
+
+                <td>${t.name}</td>
+                <td>${t.email}</td>
+                <td>${t.qualification || "-"}</td>
+                <td>${t.experience || "-"}</td>
+
+                <td>
+                    <button class="btn btn-sm btn-warning edit-teacher" data-id="${t.id}">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-info view-teacher" data-id="${t.id}">
+                        <i class="bi bi-eye"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-danger delete-teacher" data-id="${t.id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+}); 
+
+});
+
+</script>
+
+{% endblock %}

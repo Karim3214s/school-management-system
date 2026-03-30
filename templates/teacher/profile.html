@@ -1,0 +1,41 @@
+{% extends "layout/base_main.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+  <h2 class="mb-4">👤 My Profile</h2>
+
+  <div class="card shadow-sm p-4" style="max-width: 600px; margin:auto;">
+
+    <!-- PROFILE IMAGE -->
+    <div class="text-center mb-3">
+      <img src="{% if teacher.profile_image %}
+                   {{ url_for('static', filename='uploads/' + teacher.profile_image) }}
+                 {% else %}
+                   {{ url_for('static', filename='assets/img/default-user.png') }}
+                 {% endif %}"
+           class="rounded-circle"
+           width="120"
+           height="120"
+           style="object-fit: cover;">
+    </div>
+
+    <!-- DETAILS -->
+    <div class="text-center">
+
+      <h4>{{ teacher.user_account.name }}</h4>
+      <p class="text-muted">{{ teacher.user_account.email }}</p>
+
+      <hr>
+
+      <p><strong>Qualification:</strong> {{ teacher.qualification }}</p>
+      <p><strong>Experience:</strong> {{ teacher.experience }} years</p>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

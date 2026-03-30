@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}School Management{% endblock %}</title>
+
+    <!-- Bootstrap + Vendor -->
+    <link href="{{ url_for('static', filename='assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='assets/vendor/aos/aos.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+
+    <!-- Main CSS -->
+    <link href="{{ url_for('static', filename='assets/css/main.css') }}" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #f8f9fa, #eef9f1);
+        }
+    </style>
+</head>
+
+<body>
+    {%block content %}{% endblock %}
+    <!-- NAVBAR -->
+    <header class="header d-flex align-items-center sticky-top">
+        <div class="container-fluid container-xl d-flex align-items-center">
+
+            <a href="{{ url_for('common.home') }}" class="logo me-auto">
+                <h1>MITRAz</h1>
+            </a>
+
+            <nav class="navmenu">
+                <ul>
+                    <li><a href="{{ url_for('common.home') }}">Home</a></li>
+                    <li><a href="{{ url_for('common.about') }}">About</a></li>
+                    <li><a href="{{ url_for('common.faculty') }}">Faculty</a></li>
+                    <li><a href="{{ url_for('common.contact') }}">Contact</a></li>
+                </ul>
+            </nav>
+
+            <a class="btn-getstarted" href="{{ url_for('auth.login') }}">Login</a>
+
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer text-center p-4">
+        <p>© School Management System</p>
+    </footer>
+
+    <!-- JS -->
+    <script src="{{ url_for('static', filename='assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/vendor/aos/aos.js') }}"></script>
+    {% if request.endpoint != 'auth.login' %}
+    <script src="{{ url_for('static', filename='assets/js/main.js') }}"></script>
+    {% endif %}
+    {% block scripts %}{% endblock %}
+
+</body>
+
+</html>

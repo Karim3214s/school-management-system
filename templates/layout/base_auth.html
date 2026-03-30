@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Authentication</title>
+
+  <link href="{{ url_for('static', filename='assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='assets/css/main.css') }}" rel="stylesheet">
+
+</head>
+
+<body style="background: linear-gradient(135deg, #4CAF50, #2E7D32); height:100vh;">
+
+  <main class="d-flex justify-content-center align-items-center h-100">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- 🔥 VERY IMPORTANT -->
+  {% block scripts %}{% endblock %}
+
+</body>
+
+</html>

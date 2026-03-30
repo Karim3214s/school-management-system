@@ -1,0 +1,454 @@
+{% extends "layout/base_main.html" %}
+
+{% block page_title %}Manage Students{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-people me-2"></i>Manage Students</h2>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+        <i class="bi bi-plus-lg"></i> Add Student
+    </button>
+</div>
+
+<form id="studentSearchForm" class="mb-3 d-flex">
+
+    <input type="text" id="studentSearch" class="form-control me-2" placeholder="Search students...">
+
+    <button type="submit" class="btn btn-success">
+        Search
+    </button>
+
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover shadow-sm bg-white">
+        <thead class="table-light">
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Class</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th style="width: 120px;">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id="studentTableBody">
+            {% if students %}
+            {% for student in students.items %}
+            <tr>
+                <td>{{ student.user.name }}</td>
+                <td>{{ student.user.email }}</td>
+                <td>{{ student.class_.class_name }}</td>
+                <td>{{ student.age }}</td>
+                <td>{{ student.gender }}</td>
+                <td class="d-flex gap-2 justify-content-center">
+                    <button class="btn btn-sm btn-outline-warning edit-student" data-id="{{ student.id }}">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-info view-student" data-id="{{ student.id }}">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger delete-student" data-id="{{ student.id }}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">
+                    No students available
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+        <!-- PREVIOUS -->
+        <li class="page-item {% if not students.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.manage_students', page=students.prev_num, search=search) }}">
+                Previous
+            </a>
+        </li>
+
+        {% for p in range(1, students.pages + 1) %}
+        <li class="page-item {% if p == students.page %}active disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.manage_students', page=p, search=search) }}">
+                {{ p }}
+            </a>
+        </li>
+        {% endfor %}
+
+        <li class="page-item {% if not students.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.manage_students', page=students.next_num, search=search) }}">
+                Next
+            </a>
+        </li>
+
+    </ul>
+</nav>
+
+<!-- ================= ADD STUDENT MODAL ================= -->
+<div class="modal fade" id="addStudentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-plus"></i> Add Student</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="addStudentForm">
+
+                    <input type="text" id="studentName" class="form-control mb-2" placeholder="Name" required>
+
+                    <input type="email" id="studentEmail" class="form-control mb-2" placeholder="Email" required>
+
+                    <!-- 🔥 CLASS + ADD BUTTON -->
+                    <div class="d-flex gap-2 mb-2">
+                        <select id="studentClass" class="form-select" required>
+                            <option value="">Select Class</option>
+                            {% for c in classes %}
+                            <option value="{{ c.id }}">{{ c.class_name }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                            data-bs-target="#addClassModal">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+
+                    <input type="number" id="studentAge" class="form-control mb-2" placeholder="Age">
+
+                    <select id="studentGender" class="form-select mb-2">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+
+                    <input type="text" id="parentName" class="form-control mb-2" placeholder="Parent Name">
+
+                    <input type="text" id="parentPhone" class="form-control mb-2" placeholder="Parent Phone">
+
+                    <textarea id="studentAddress" class="form-control mb-3" placeholder="Address"></textarea>
+
+                    <button type="submit" class="btn btn-success w-100">Submit</button>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================= ADD CLASS MODAL ================= -->
+<div class="modal fade" id="addClassModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content p-3">
+
+            <h5 class="mb-3"><i class="bi bi-building"></i> Add Class</h5>
+
+            <input type="text" id="newClassName" class="form-control mb-3" placeholder="Enter class name">
+
+            <button class="btn btn-success w-100" onclick="addClass()">
+                Add Class
+            </button>
+
+            <div id="classMsg" class="mt-2 small text-center"></div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================= VIEW STUDENT MODAL ================= -->
+<div class="modal fade" id="viewStudentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+
+            <h5>Student Details</h5>
+            <hr>
+
+            <p><b>Name:</b> <span id="sName"></span></p>
+            <p><b>Email:</b> <span id="sEmail"></span></p>
+            <p><b>Class:</b> <span id="sClass"></span></p>
+            <p><b>Age:</b> <span id="sAge"></span></p>
+            <p><b>Gender:</b> <span id="sGender"></span></p>
+            <p><b>Parent:</b> <span id="sParent"></span></p>
+            <p><b>Phone:</b> <span id="sPhone"></span></p>
+            <p><b>Address:</b> <span id="sAddr"></span></p>
+
+            <button class="btn btn-secondary mt-2" data-bs-dismiss="modal">Close</button>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================= EDIT STUDENT MODAL ================= -->
+<div class="modal fade" id="editStudentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content p-3">
+
+            <h5>Edit Student</h5>
+
+            <form id="editStudentForm">
+
+                <input type="hidden" id="editStudentId">
+
+                <input type="text" id="editStudentName" class="form-control mb-2">
+                <input type="email" id="editStudentEmail" class="form-control mb-2">
+
+                <select id="editStudentClass" class="form-control mb-2">
+                    {% for c in classes %}
+                    <option value="{{ c.id }}">{{ c.class_name }}</option>
+                    {% endfor %}
+                </select>
+
+                <input type="number" id="editStudentAge" class="form-control mb-2">
+
+                <select id="editStudentGender" class="form-control mb-2">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+
+                <input type="text" id="editParentName" class="form-control mb-2">
+                <input type="text" id="editParentPhone" class="form-control mb-2">
+
+                <textarea id="editStudentAddress" class="form-control mb-2"></textarea>
+
+                <button type="submit" class="btn btn-success w-100">Update</button>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin_logic.js') }}"></script>
+
+<script>
+
+    // ================= ADD CLASS =================
+    async function addClass() {
+
+        const name = document.getElementById("newClassName").value.trim();
+        const msg = document.getElementById("classMsg");
+
+        if (!name) {
+            msg.innerHTML = `<span class="text-danger">Enter class name</span>`;
+            return;
+        }
+
+        const res = await fetch("/admin/add-class", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ class_name: name })
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+
+            await loadClassesDropdown();
+
+            // ✅ AUTO SELECT CLASS
+            if (data.class) {
+                document.getElementById("studentClass").value = data.class.id;
+
+                const editDropdown = document.getElementById("editStudentClass");
+                if (editDropdown) {
+                    editDropdown.value = data.class.id;
+                }
+            }
+
+            document.getElementById("newClassName").value = "";
+            msg.innerHTML = "";
+
+            // ✅ CLOSE CLASS MODAL
+            const classModal = bootstrap.Modal.getInstance(document.getElementById('addClassModal'));
+            classModal.hide();
+
+            // 🔥 FIX: restore student modal properly
+            setTimeout(() => {
+                const studentModal = new bootstrap.Modal(document.getElementById('addStudentModal'));
+                studentModal.show();
+            }, 300);
+
+        } else {
+            msg.innerHTML = `<span class="text-danger">${data.message}</span>`;
+        }
+    }
+
+    // ================= AJAX LIVE SEARCH =================
+
+
+    const form = document.getElementById("studentSearchForm");
+
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault(); // 🚨 stop page reload
+
+        const value = document.getElementById("studentSearch").value.trim();
+
+        const res = await fetch(`/admin/search-students?search=${value}`);
+        const data = await res.json();
+
+        const tbody = document.getElementById("studentTableBody");
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center text-muted">
+                    No students found
+                </td>
+            </tr>
+        `;
+            return;
+        }
+
+        data.forEach(s => {
+            tbody.innerHTML += `
+            <tr>
+                <td>${s.name}</td>
+                <td>${s.email}</td>
+                <td>${s.class}</td>
+                <td>${s.age || "-"}</td>
+                <td>${s.gender || "-"}</td>
+
+                <td class="d-flex gap-2 justify-content-center">
+
+                    <button class="btn btn-sm btn-outline-warning edit-student" data-id="${s.id}">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-outline-info view-student" data-id="${s.id}">
+                        <i class="bi bi-eye"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-outline-danger delete-student" data-id="${s.id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+
+                </td>
+            </tr>
+        `;
+        });
+
+    });
+
+
+
+    // ================= LOAD CLASSES =================
+    async function loadClassesDropdown() {
+
+        const res = await fetch('/admin/get-classes');
+        const data = await res.json();
+
+        const dropdowns = [
+            document.getElementById("studentClass"),
+            document.getElementById("editStudentClass")
+        ];
+
+        dropdowns.forEach(dropdown => {
+            if (dropdown) {
+                const current = dropdown.value;
+
+                dropdown.innerHTML = '<option value="">Select Class</option>';
+
+                data.forEach(c => {
+                    const option = document.createElement("option");
+                    option.value = c.id;
+                    option.textContent = c.class_name;
+                    dropdown.appendChild(option);
+                });
+
+                if (current) dropdown.value = current;
+            }
+        });
+    }
+
+
+    // ================= DELETE =================
+    document.addEventListener("click", async function (e) {
+
+        if (e.target.closest(".delete-student")) {
+
+            const btn = e.target.closest(".delete-student");
+            const id = btn.dataset.id;
+            if (!confirm("Delete this student?")) return;
+
+            const res = await fetch(`/admin/delete-student/${id}`, {
+                method: "DELETE"
+            });
+
+            const data = await res.json();
+
+            if (data.status === "success") {
+                location.reload();
+            }
+        }
+    });
+
+
+    // ================= VIEW =================
+    document.addEventListener("click", async function (e) {
+
+        if (e.target.closest(".view-student")) {
+
+            const id = e.target.closest("button").dataset.id;
+
+            const res = await fetch(`/admin/get-student/${id}`);
+            const data = await res.json();
+
+            // ✅ SAFE VALUES (NO undefined)
+            document.getElementById("sName").innerText = data.name || "-";
+            document.getElementById("sEmail").innerText = data.email || "-";
+            document.getElementById("sClass").innerText = data.class || "-";
+            document.getElementById("sAge").innerText = data.age || "-";
+            document.getElementById("sGender").innerText = data.gender || "-";
+            document.getElementById("sParent").innerText = data.parent_name || "-";
+            document.getElementById("sPhone").innerText = data.parent_phone || "-";
+            document.getElementById("sAddr").innerText = data.address || "-";
+
+            new bootstrap.Modal(document.getElementById('viewStudentModal')).show();
+        }
+    });
+
+    // ================= EDIT =================
+    document.addEventListener("click", async function (e) {
+
+        if (e.target.closest(".edit-student")) {
+
+            const id = e.target.closest("button").dataset.id;
+
+            const res = await fetch(`/admin/get-student/${id}`);
+            const data = await res.json();
+
+            document.getElementById("editStudentId").value = id;
+            document.getElementById("editStudentName").value = data.name || "";
+            document.getElementById("editStudentEmail").value = data.email || "";
+            document.getElementById("editStudentClass").value = data.class_id || "";
+            document.getElementById("editStudentAge").value = data.age || "";
+            document.getElementById("editStudentGender").value = data.gender || "";
+            document.getElementById("editParentName").value = data.parent_name || "";
+            document.getElementById("editParentPhone").value = data.parent_phone || "";
+            document.getElementById("editStudentAddress").value = data.address || "";
+
+            new bootstrap.Modal(document.getElementById('editStudentModal')).show();
+        }
+    });
+</script>
+{% endblock %}

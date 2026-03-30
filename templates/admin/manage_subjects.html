@@ -1,0 +1,253 @@
+{% extends "layout/base_main.html" %}
+
+{% block page_title %}Manage Subjects{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Manage Subjects</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+        + Add Subject
+    </button>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered bg-white">
+        <thead class="table-light">
+            <tr>
+                <th>Subject Name</th>
+                <th style="width: 150px;">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% if subjects %}
+            {% for subject in subjects.items %}
+            <tr>
+                <td>{{ subject.subject_name }}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning edit-subject" data-id="{{ subject.id }}"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-info view-subject" data-id="{{ subject.id }}"><i class="bi bi-eye"></i></button>
+                    <button class="btn btn-sm btn-danger delete-subject" data-id="{{ subject.id }}"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="2" class="text-center text-muted">
+                    No subjects available
+                </td>
+            </tr>
+            {% endif %}
+
+        </tbody>
+    </table>
+</div>
+
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+        <!-- PREVIOUS -->
+        <li class="page-item {% if not subjects.has_prev %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('admin.manage_subjects', page=subjects.prev_num) }}">
+                Previous
+            </a>
+        </li>
+
+        <!-- PAGE NUMBERS -->
+        {% for p in range(1, subjects.pages + 1) %}
+        <li class="page-item {% if p == subjects.page %}active disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('admin.manage_subjects', page=p) }}">
+                {{ p }}
+            </a>
+        </li>
+        {% endfor %}
+
+        <!-- NEXT -->
+        <li class="page-item {% if not subjects.has_next %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('admin.manage_subjects', page=subjects.next_num) }}">
+                Next
+            </a>
+        </li>
+
+    </ul>
+</nav>
+
+<!-- Modal -->
+<div class="modal fade" id="addSubjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content p-4">
+
+            <h4 class="mb-3">Add Subject</h4>
+
+            <form id="addSubjectForm" class="d-flex flex-column gap-3">
+
+                <div>
+                    <label class="form-label">Subject Name</label>
+                    <input type="text" id="subjectName" class="form-control" placeholder="e.g., Mathematics" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Add Subject
+                </button>
+
+                <div id="subjectMessage"></div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewSubjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+
+            <h5>Subject Details</h5>
+            <hr>
+
+            <p><b>Subject Name:</b> <span id="viewSubjectName"></span></p>
+
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editSubjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+
+            <h5>Edit Subject</h5>
+
+            <form id="editSubjectForm">
+
+                <input type="hidden" id="editSubjectId">
+
+                <input type="text" id="editSubjectName" class="form-control mb-3">
+
+                <button type="submit" class="btn btn-success w-100">
+                    Update
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+{% block scripts %}
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // ================= ADD SUBJECT =================
+    const addForm = document.getElementById("addSubjectForm");
+
+    addForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const name = document.getElementById("subjectName").value;
+
+        const res = await fetch("/admin/add-subject", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ subject_name: name })
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+            location.reload();
+        } else {
+            document.getElementById("subjectMessage").innerText = data.message;
+        }
+    });
+
+
+    // ================= CLICK HANDLER =================
+    document.addEventListener("click", async function(e) {
+
+        const btn = e.target.closest("button"); // 🔥 FIX
+        if (!btn) return;
+
+        // ===== VIEW =====
+        if (btn.classList.contains("view-subject")) {
+
+            const id = btn.dataset.id;
+
+            const res = await fetch(`/admin/get-subject/${id}`);
+            const data = await res.json();
+
+            document.getElementById("viewSubjectName").innerText = data.subject_name;
+
+            new bootstrap.Modal(document.getElementById('viewSubjectModal')).show();
+        }
+
+        // ===== EDIT =====
+        if (btn.classList.contains("edit-subject")) {
+
+            const id = btn.dataset.id;
+
+            const res = await fetch(`/admin/get-subject/${id}`);
+            const data = await res.json();
+
+            document.getElementById("editSubjectId").value = id;
+            document.getElementById("editSubjectName").value = data.subject_name;
+
+            new bootstrap.Modal(document.getElementById('editSubjectModal')).show();
+        }
+
+        // ===== DELETE =====
+        if (btn.classList.contains("delete-subject")) {
+
+            const id = btn.dataset.id;
+
+            if (!confirm("Delete subject?")) return;
+
+            const res = await fetch(`/admin/delete-subject/${id}`, {
+                method: "DELETE"
+            });
+
+            const data = await res.json();
+
+            if (data.status === "success") {
+                btn.closest("tr").remove();
+            }
+        }
+
+    });
+
+
+    // ================= UPDATE =================
+    document.getElementById("editSubjectForm").addEventListener("submit", async function(e) {
+
+        e.preventDefault();
+
+        const id = document.getElementById("editSubjectId").value;
+        const name = document.getElementById("editSubjectName").value;
+
+        const res = await fetch(`/admin/update-subject/${id}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ subject_name: name })
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+            location.reload();
+        } else {
+            alert("Error updating subject");
+        }
+
+    });
+
+});
+
+</script>
+{% endblock %}
+{% endblock %}

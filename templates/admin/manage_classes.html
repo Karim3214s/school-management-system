@@ -1,0 +1,148 @@
+{% extends "layout/base_main.html" %}
+
+{% block page_title %}Manage Classes{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Manage Classes</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClassModal">
+        + Add Class
+    </button>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered bg-white">
+        <thead class="table-light">
+            <tr>
+                <th>Class Name</th>
+                <th style="width: 150px;">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% if classes %}
+            {% for c in classes.items %}
+            <tr>
+                <td>{{ c.class_name }}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning edit-class" data-id="{{ c.id }}"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-info view-class" data-id="{{ c.id }}"><i class="bi bi-eye"></i></button>
+                    <button class="btn btn-sm btn-danger delete-class" data-id="{{ c.id }}"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="2" class="text-center text-muted">
+                    No classes available
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+        <!-- PREVIOUS -->
+        <li class="page-item {% if not classes.has_prev %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('admin.manage_classes', page=classes.prev_num) }}">
+                Previous
+            </a>
+        </li>
+
+        <!-- PAGE NUMBERS -->
+        {% for p in range(1, classes.pages + 1) %}
+        <li class="page-item {% if p == classes.page %}active disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('admin.manage_classes', page=p) }}">
+                {{ p }}
+            </a>
+        </li>
+        {% endfor %}
+
+        <!-- NEXT -->
+        <li class="page-item {% if not classes.has_next %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('admin.manage_classes', page=classes.next_num) }}">
+                Next
+            </a>
+        </li>
+
+    </ul>
+</nav>
+
+
+<!-- Add Class Modal -->
+<div class="modal fade" id="addClassModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content p-4">
+
+            <h4 class="mb-3">Add Class</h4>
+
+            <form id="addClassForm" class="d-flex flex-column gap-3">
+
+                <div>
+                    <label class="form-label">Class Name</label>
+                    <input type="text" id="className" class="form-control" placeholder="e.g., 10th A" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Add Class
+                </button>
+
+                <div id="classMessage"></div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- VIEW CLASS MODAL -->
+<div class="modal fade" id="viewClassModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+
+            <h5>Class Details</h5>
+            <hr>
+
+            <p><b>Class Name:</b> <span id="viewClassName"></span></p>
+
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editClassModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+
+            <h5>Edit Class</h5>
+
+            <form id="editClassForm">
+
+                <input type="hidden" id="editClassId">
+
+                <input type="text" id="editClassName" class="form-control mb-3">
+
+                <button type="submit" class="btn btn-success w-100">
+                    Update
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin_logic.js') }}"></script>
+{% endblock %}

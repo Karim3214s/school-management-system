@@ -1,0 +1,284 @@
+{% extends "layout/base_main.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <!-- PAGE TITLE -->
+    <h2 class="mb-4">Assign Teacher</h2>
+
+    <!-- FORM CARD -->
+    <div class="card p-4 mb-5 shadow-sm">
+
+        <form id="assignTeacherForm" class="d-flex flex-column gap-3">
+
+            <!-- 🔥 Hidden Edit ID -->
+            <input type="hidden" id="editAssignmentId">
+
+            <!-- Teacher -->
+            <div>
+                <label class="form-label">Select Teacher</label>
+                <select id="assignTeacherId" class="form-select" required>
+                    <option value="">---select teacher---</option>
+                    {% for t in teachers %}
+                    <option value="{{ t.id }}">
+                        {{ t.user_account.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Class -->
+            <div>
+                <label class="form-label">Select Class</label>
+                <select id="assignClassId" class="form-select" required>
+                    <option value="">---select class---</option>
+                    {% for c in classes %}
+                    <option value="{{ c.id }}">
+                        {{ c.class_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Subject -->
+            <div>
+                <label class="form-label">Select Subject</label>
+                <select id="assignSubjectId" class="form-select" required>
+                    <option value="">---select subject---</option>
+                    {% for s in subjects %}
+                    <option value="{{ s.id }}">
+                        {{ s.subject_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Error -->
+            <p id="assignError" class="text-danger mt-2 d-none">
+                This subject is already assigned to another teacher
+            </p>
+
+            <!-- Buttons -->
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary" id="assignBtn">
+                    Assign Teacher
+                </button>
+
+                <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                    Cancel
+                </button>
+            </div>
+
+            <!-- Success -->
+            <div id="assignMessage" class="mt-2 text-success fw-bold"></div>
+
+        </form>
+
+    </div>
+
+    <!-- TABLE -->
+    <h4>Recent Teacher Assignments</h4>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-striped bg-white shadow-sm mt-3">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Teacher</th>
+                    <th>Class</th>
+                    <th>Subject</th>
+                    <th style="width: 120px;">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="assignmentTable">
+
+                {% if assignments %}
+                {% for assignment in assignments.items %}
+                <tr>
+                    <td>{{ assignment.teacher.user_account.name }}</td>
+                    <td>{{ assignment.class_.class_name }}</td>
+                    <td>{{ assignment.subject.subject_name }}</td>
+                    <td>
+
+                        <button class="btn btn-sm btn-outline-warning edit-btn" data-id="{{ assignment.id }}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+
+                        <button class="btn btn-sm btn-outline-danger delete-btn" data-id="{{ assignment.id }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">
+                        No assignments available
+                    </td>
+                </tr>
+                {% endif %}
+
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+<!-- PAGINATION -->
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+        <li class="page-item {% if not assignments.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.assign_teachers', page=assignments.prev_num) }}">
+                Previous
+            </a>
+        </li>
+
+        {% for p in range(1, assignments.pages + 1) %}
+        <li class="page-item {% if p == assignments.page %}active disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.assign_teachers', page=p) }}">
+                {{ p }}
+            </a>
+        </li>
+        {% endfor %}
+
+        <li class="page-item {% if not assignments.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.assign_teachers', page=assignments.next_num) }}">
+                Next
+            </a>
+        </li>
+
+    </ul>
+</nav>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+
+    // ================= CREATE / UPDATE =================
+    document.getElementById("assignTeacherForm").addEventListener("submit", async function (e) {
+
+        e.preventDefault();
+
+        const teacher_id = document.getElementById("assignTeacherId").value;
+        const class_id = document.getElementById("assignClassId").value;
+        const subject_id = document.getElementById("assignSubjectId").value;
+
+        const editId = document.getElementById("editAssignmentId").value;
+
+        const errorBox = document.getElementById("assignError");
+        const successMsg = document.getElementById("assignMessage");
+
+        errorBox.classList.add("d-none");
+        successMsg.innerText = "";
+
+        let url = "/admin/assign-teacher";
+        let method = "POST";
+
+        if (editId) {
+            url = `/admin/update-assignment/${editId}`;
+            method = "PUT";
+        }
+
+        const res = await fetch(url, {
+            method: method,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ teacher_id, class_id, subject_id })
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+
+            successMsg.innerText = editId
+                ? "Updated successfully ✅"
+                : "Assigned successfully ✅";
+
+            resetForm();
+
+            setTimeout(() => location.reload(), 800);
+        }
+
+        else if (data.status === "exists") {
+            errorBox.classList.remove("d-none");
+        }
+
+        else {
+            errorBox.classList.remove("d-none");
+            errorBox.innerText = data.message;
+        }
+    });
+
+
+    // ================= EDIT =================
+    document.addEventListener("click", async function (e) {
+
+        const btn = e.target.closest(".edit-btn");
+
+        if (btn) {
+
+            const id = btn.dataset.id;
+
+            const res = await fetch(`/admin/get-assignment/${id}`);
+            const data = await res.json();
+
+            document.getElementById("assignTeacherId").value = data.teacher_id;
+            document.getElementById("assignClassId").value = data.class_id;
+            document.getElementById("assignSubjectId").value = data.subject_id;
+
+            document.getElementById("editAssignmentId").value = id;
+
+            document.getElementById("assignBtn").innerText = "Update Assignment";
+
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+    });
+
+
+    // ================= DELETE =================
+    document.addEventListener("click", async function (e) {
+
+        const btn = e.target.closest(".delete-btn");
+
+        if (btn) {
+
+            const id = btn.dataset.id;
+
+            if (!confirm("Delete this assignment?")) return;
+
+            const res = await fetch(`/admin/delete-assignment/${id}`, {
+                method: "DELETE"
+            });
+
+            const data = await res.json();
+
+            if (data.status === "success") {
+                btn.closest("tr").remove();
+            }
+        }
+    });
+
+
+    // ================= RESET FORM =================
+    function resetForm() {
+
+        document.getElementById("assignTeacherForm").reset();
+        document.getElementById("editAssignmentId").value = "";
+
+        document.getElementById("assignBtn").innerText = "Assign Teacher";
+
+        document.getElementById("assignError").classList.add("d-none");
+        document.getElementById("assignMessage").innerText = "";
+    }
+
+</script>
+
+{% endblock %}

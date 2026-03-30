@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Panel</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            height: 100vh;
+            width: 230px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #212529;
+            padding-top: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #ccc;
+            padding: 12px 20px;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: #343a40;
+            color: #fff;
+        }
+
+        .sidebar .active {
+            background: #0d6efd;
+            color: white;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 230px;
+            padding: 20px;
+        }
+
+        .user-box {
+            color: white;
+            padding: 15px 20px;
+            border-top: 1px solid #444;
+            margin-top: 20px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- ================= SIDEBAR ================= -->
+    <div class="sidebar">
+
+        <h5 class="text-white text-center mb-4">Teacher Panel</h5>
+
+        <a href="{{ url_for('teacher.dashboard') }}"
+            class="{% if request.endpoint == 'teacher.dashboard' %}active{% endif %}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('teacher.my_students') }}">
+            My Students
+        </a>
+
+        <!-- USER -->
+        <div class="user-box">
+            👋 {{ teacher.user_account.name if teacher else 'Teacher' }}
+            <br>
+            <a href="{{ url_for('auth.logout') }}" class="text-danger">Logout</a>
+        </div>
+
+    </div>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+
+</html>

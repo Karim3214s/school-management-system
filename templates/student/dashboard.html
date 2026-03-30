@@ -1,0 +1,92 @@
+{% extends "layout/base_main.html" %}
+
+{% block content %}
+
+<h3 class="mb-4 fw-bold">Student Dashboard</h3>
+
+<!-- PROFILE -->
+<div class="card shadow-sm border-0 p-4 mb-4">
+    <h5 class="mb-3">Profile</h5>
+    <p><strong>Name:</strong> {{ student.user.name }}</p>
+    <p><strong>Class:</strong> {{ student.class_.class_name }}</p>
+</div>
+
+<!-- STATS -->
+{% if marks %}
+<div class="row g-4 mb-4">
+
+    <div class="col-md-4">
+        <div class="card p-3 text-center bg-primary text-white">
+            <p>Total Marks</p>
+            <h3>{{ total_marks }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 text-center bg-success text-white">
+            <p>Average</p>
+            <h3>{{ average_marks }}%</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 text-center bg-warning text-dark">
+            <p>Performance</p>
+
+            {% if average_marks >= 75 %}
+                <b>Excellent</b>
+            {% elif average_marks >= 50 %}
+                <b>Good</b>
+            {% elif average_marks >= 40 %}
+                <b>Average</b>
+            {% else %}
+                <b class="text-danger">Needs Improvement</b>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endif %}
+
+<!-- MARKS TABLE -->
+<div class="card shadow-sm border-0 p-4">
+
+    <h5 class="mb-3">Marks</h5>
+
+    <table class="table table-bordered">
+
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Marks</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% if marks %}
+                {% for mark in marks %}
+                <tr>
+                    <td>{{ mark.subject.subject_name }}</td>
+                    <td>{{ mark.marks }}</td>
+                    <td>
+                        {% if mark.marks >= 40 %}
+                            <span class="text-success">Pass</span>
+                        {% else %}
+                            <span class="text-danger">Fail</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3">No marks available</td>
+                </tr>
+            {% endif %}
+        </tbody>
+
+    </table>
+
+</div>
+{% endblock %}

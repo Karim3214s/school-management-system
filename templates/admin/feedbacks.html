@@ -1,0 +1,132 @@
+{% extends "layout/base_main.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+  <h2 class="mb-4">📢 Feedback Management</h2>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle text-center">
+
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Message</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        {% for f in feedbacks %}
+        <tr id="row-{{ f.id }}">
+          <td>{{ loop.index }}</td>
+          <td>{{ f.name }}</td>
+          <td>{{ f.role }}</td>
+          <td style="max-width:250px;">{{ f.message }}</td>
+
+          <!-- STATUS -->
+          <td id="status-{{ f.id }}">
+            {% if f.status == "approved" %}
+              <span class="badge bg-success">Approved</span>
+            {% elif f.status == "rejected" %}
+              <span class="badge bg-danger">Rejected</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Pending</span>
+            {% endif %}
+          </td>
+
+          <!-- ACTION -->
+          <td id="action-{{ f.id }}">
+            {% if f.status == "pending" %}
+              <button class="btn btn-sm btn-success approve-btn" data-id="{{ f.id }}">
+                ✔ Approve
+              </button>
+
+              <button class="btn btn-sm btn-danger reject-btn" data-id="{{ f.id }}">
+                ✖ Reject
+              </button>
+            {% else %}
+              <span class="text-muted">No Action</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+
+      </tbody>
+
+    </table>
+  </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- 🔥 CLEAN JS (NO INLINE) -->
+<!-- ========================= -->
+<script>
+
+document.addEventListener("click", async function(e) {
+
+  // APPROVE
+  if (e.target.classList.contains("approve-btn")) {
+
+    const id = e.target.dataset.id;
+
+    try {
+      const res = await fetch(`/admin/feedback/approve/${id}`, {
+        method: "POST"
+      });
+
+      const data = await res.json();
+
+      if (data.status === "success") {
+
+        document.getElementById(`status-${id}`).innerHTML =
+          `<span class="badge bg-success">Approved</span>`;
+
+        document.getElementById(`action-${id}`).innerHTML =
+          `<span class="text-muted">No Action</span>`;
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
+  }
+
+  // REJECT
+  if (e.target.classList.contains("reject-btn")) {
+
+    const id = e.target.dataset.id;
+
+    try {
+      const res = await fetch(`/admin/feedback/reject/${id}`, {
+        method: "POST"
+      });
+
+      const data = await res.json();
+
+      if (data.status === "success") {
+
+        document.getElementById(`status-${id}`).innerHTML =
+          `<span class="badge bg-danger">Rejected</span>`;
+
+        document.getElementById(`action-${id}`).innerHTML =
+          `<span class="text-muted">No Action</span>`;
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
+  }
+
+});
+
+</script>
+
+{% endblock %}

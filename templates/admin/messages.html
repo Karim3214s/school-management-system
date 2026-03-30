@@ -1,0 +1,90 @@
+{% extends "layout/base_main.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+  <h2 class="mb-4">📩 Contact Messages</h2>
+
+  {% if messages %}
+
+  <h4 class="text-success">✔ Replied Messages</h4>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+
+      <thead class="table-success text-center">
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Subject</th>
+          <th>Message</th>
+          <th>Reply</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        {% set count = 1 %}
+
+        {% for m in messages %}
+          {% if m.reply %}
+          <tr>
+            <td>{{ count }}</td>
+            <td>{{ m.name }}</td>
+            <td>{{ m.email }}</td>
+            <td>{{ m.subject }}</td>
+            <td>{{ m.message }}</td>
+            <td class="text-success">{{ m.reply }}</td>
+          </tr>
+          {% set count = count + 1 %}
+          {% endif %}
+        {% endfor %}
+
+      </tbody>
+
+    </table>
+  </div>
+
+  {% endif %}
+
+  <!-- PAGINATION -->
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+      {% if pagination.has_prev %}
+      <li class="page-item">
+        <a class="page-link"
+           href="{{ url_for('admin.messages', page=pagination.prev_num) }}">
+          Previous
+        </a>
+      </li>
+      {% endif %}
+
+      {% for p in pagination.iter_pages() %}
+        {% if p %}
+          <li class="page-item {% if p == pagination.page %}active{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('admin.messages', page=p) }}">
+              {{ p }}
+            </a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link"
+           href="{{ url_for('admin.messages', page=pagination.next_num) }}">
+          Next
+        </a>
+      </li>
+      {% endif %}
+
+    </ul>
+  </nav>
+
+</div>
+
+{% endblock %}
