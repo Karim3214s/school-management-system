@@ -166,7 +166,7 @@ Password: admin123
 **Karim**
 
 * GitHub: https://github.com/karim3214s
-* LinkedIn: http://www.linkedin.com/in/karimulla-shaik-97a872258
+* LinkedIn: http://www.linkedin.com/in/karim3214s
 
 ---
 
